@@ -8,5 +8,8 @@
   "iot_class": "local_polling",
   "homeassistant": "2023.10.0",
   "icon": "icon.svg",
-  "logo": "logo.png"
+  "logo": "logo.png",
+  "codeowners": ["@xzw9308"],
+  "dependencies": []
 }
+
