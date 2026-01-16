@@ -1,0 +1,6 @@
+{
+  "name": "Growatt Inverter (Modbus TCP)",
+  "content_in_root": false,
+  "domains": ["growatt_tcp"],
+  "render_readme": true
+}

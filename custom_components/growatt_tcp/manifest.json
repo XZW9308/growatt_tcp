@@ -1,0 +1,12 @@
+{
+  "domain": "growatt_tcp",
+  "name": "Growatt Inverter (Modbus TCP)",
+  "version": "1.0.0",
+  "documentation": "https://github.com/xzw9308/growatt_tcp",
+  "requirements": ["pymodbus"],
+  "config_flow": true,
+  "iot_class": "local_polling",
+  "homeassistant": "2023.10.0",
+  "icon": "icon.svg",
+  "logo": "logo.png"
+}
