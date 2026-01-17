@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import struct
 
@@ -8,19 +7,18 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.const import CONF_HOST
 
-from pymodbus.client.tcp import ModbusTcpClient
-
 from .const import (
+    DOMAIN,
     SENSOR_REGISTERS,
     DEFAULT_PORT,
     SYSTEM_STATUS_MAP,
 )
+from .modbus_manager import GrowattModbusManager
 
 _LOGGER = logging.getLogger(__name__)
 
 
 def is_high_register(cfg: dict) -> bool:
-    """是否为高位寄存器（仅依据名称）"""
     return "高位" in cfg.get("name", "")
 
 
@@ -32,15 +30,17 @@ async def async_setup_entry(
     host = entry.data[CONF_HOST]
     port = entry.data.get("port", DEFAULT_PORT)
 
-    client = ModbusTcpClient(host=host, port=port)
+    manager = GrowattModbusManager(host, port)
+
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][entry.entry_id] = manager
 
     entities = []
     used_addresses = set()
 
-    # 按寄存器地址排序
     sorted_items = sorted(
         SENSOR_REGISTERS.items(),
-        key=lambda item: item[1]["address"]
+        key=lambda item: item[1]["address"],
     )
 
     for key, cfg in sorted_items:
@@ -69,10 +69,10 @@ async def async_setup_entry(
 
             entities.append(
                 GrowattTcp32BitSensor(
-                    entry=entry,
-                    client=client,
-                    high_cfg=cfg,
-                    low_cfg=low_cfg,
+                    entry,
+                    manager,
+                    cfg,
+                    low_cfg,
                 )
             )
 
@@ -82,9 +82,9 @@ async def async_setup_entry(
         # ===== 普通 16 位 =====
         entities.append(
             GrowattTcp16BitSensor(
-                entry=entry,
-                client=client,
-                cfg=cfg,
+                entry,
+                manager,
+                cfg,
             )
         )
         used_addresses.add(addr)
@@ -98,9 +98,9 @@ async def async_setup_entry(
 class GrowattTcp16BitSensor(SensorEntity):
     should_poll = True
 
-    def __init__(self, entry, client, cfg):
+    def __init__(self, entry, manager, cfg):
         self._entry = entry
-        self._client = client
+        self._manager = manager
         self._cfg = cfg
 
         self._attr_name = cfg["name"]
@@ -115,7 +115,7 @@ class GrowattTcp16BitSensor(SensorEntity):
     @property
     def device_info(self):
         return DeviceInfo(
-            identifiers={("growatt_tcp", self._entry.entry_id)},
+            identifiers={(DOMAIN, self._entry.entry_id)},
             name="Growatt 逆变器",
             manufacturer="Growatt",
             model="Modbus TCP",
@@ -126,47 +126,43 @@ class GrowattTcp16BitSensor(SensorEntity):
         return self._state
 
     async def async_update(self):
-        def read():
-            if not self._client.connect():
-                return None
+        regs = await self._manager.read_input_registers(
+            self._cfg["address"], 1
+        )
+        if not regs:
+            return
 
-            rr = self._client.read_input_registers(
-                self._cfg["address"], count=1
+        raw = regs[0]
+
+        if self._cfg["name"] == "系统状态":
+            self._state = SYSTEM_STATUS_MAP.get(
+                raw, f"未知状态({raw})"
             )
-            if rr.isError():
-                return None
+            return
 
-            raw = rr.registers[0]
+        scale = self._cfg.get("scale")
+        if scale is not None:
+            raw *= scale
 
-            # ===== 系统状态：数值 → 文本 =====
-            if self._cfg["name"] == "系统状态":
-                return SYSTEM_STATUS_MAP.get(
-                    raw, f"未知状态({raw})"
-                )
-
-            scale = self._cfg.get("scale")
-            if scale is not None:
-                raw *= scale
-
-            return raw
-
-        self._state = await asyncio.to_thread(read)
+        self._state = raw
 
 
 # =========================
-# 32 位有符号传感器（关键）
+# 32 位有符号传感器
 # =========================
 class GrowattTcp32BitSensor(SensorEntity):
     should_poll = True
 
-    def __init__(self, entry, client, high_cfg, low_cfg):
+    def __init__(self, entry, manager, high_cfg, low_cfg):
         self._entry = entry
-        self._client = client
+        self._manager = manager
         self._high_cfg = high_cfg
         self._low_cfg = low_cfg
 
         self._attr_name = high_cfg["name"].replace("高位", "").strip()
-        self._attr_unique_id = f"{entry.entry_id}_{high_cfg['address']}_32bit"
+        self._attr_unique_id = (
+            f"{entry.entry_id}_{high_cfg['address']}_32bit"
+        )
 
         self._attr_native_unit_of_measurement = high_cfg.get("unit")
         self._attr_device_class = high_cfg.get("device_class")
@@ -177,7 +173,7 @@ class GrowattTcp32BitSensor(SensorEntity):
     @property
     def device_info(self):
         return DeviceInfo(
-            identifiers={("growatt_tcp", self._entry.entry_id)},
+            identifiers={(DOMAIN, self._entry.entry_id)},
             name="Growatt 逆变器",
             manufacturer="Growatt",
             model="Modbus TCP",
@@ -188,34 +184,25 @@ class GrowattTcp32BitSensor(SensorEntity):
         return self._state
 
     async def async_update(self):
-        def read():
-            if not self._client.connect():
-                return None
+        regs = await self._manager.read_input_registers(
+            self._high_cfg["address"], 2
+        )
+        if not regs:
+            return
 
-            rr = self._client.read_input_registers(
-                self._high_cfg["address"], count=2
-            )
-            if rr.isError():
-                return None
+        high, low = regs
 
-            high, low = rr.registers
+        value = struct.unpack(
+            ">i",
+            struct.pack(">HH", high, low)
+        )[0]
 
-            # === 32 位有符号解析（核心修复）===
-            value = struct.unpack(
-                ">i",
-                struct.pack(">HH", high, low)
-            )[0]
+        # 电池充放电功率：符号语义修正
+        if self._high_cfg["address"] == 77:
+            value = -value
 
-            # === 语义修正：电池充放电功率 ===
-            # Growatt： +放电 / -充电
-            # HA习惯： +充电 / -放电
-            if self._high_cfg["address"] == 77:
-                value = -value
+        scale = self._high_cfg.get("scale")
+        if scale is not None:
+            value *= scale
 
-            scale = self._high_cfg.get("scale")
-            if scale is not None:
-                value *= scale
-
-            return value
-
-        self._state = await asyncio.to_thread(read)
+        self._state = value
