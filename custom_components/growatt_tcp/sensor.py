@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import struct
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -153,7 +154,7 @@ class GrowattTcp16BitSensor(SensorEntity):
 
 
 # =========================
-# 32 位（高位 + 低位）
+# 32 位有符号传感器（关键）
 # =========================
 class GrowattTcp32BitSensor(SensorEntity):
     should_poll = True
@@ -198,7 +199,18 @@ class GrowattTcp32BitSensor(SensorEntity):
                 return None
 
             high, low = rr.registers
-            value = (high << 16) | low
+
+            # === 32 位有符号解析（核心修复）===
+            value = struct.unpack(
+                ">i",
+                struct.pack(">HH", high, low)
+            )[0]
+
+            # === 语义修正：电池充放电功率 ===
+            # Growatt： +放电 / -充电
+            # HA习惯： +充电 / -放电
+            if self._high_cfg["address"] == 77:
+                value = -value
 
             scale = self._high_cfg.get("scale")
             if scale is not None:
