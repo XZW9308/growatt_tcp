@@ -1,15 +1,11 @@
 {
   "domain": "growatt_tcp",
   "name": "Growatt Inverter (Modbus TCP)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "documentation": "https://github.com/xzw9308/growatt_tcp",
-  "requirements": ["pymodbus"],
+  "requirements": ["pymodbus>=3.0.0"],
   "config_flow": true,
   "iot_class": "local_polling",
-  "homeassistant": "2023.10.0",
-  "icon": "icon.svg",
-  "logo": "logo.png",
-  "codeowners": ["@xzw9308"],
-  "dependencies": []
+  "homeassistant": "2023.8.0",
+  "codeowners": ["@xzw9308"]
 }
-
