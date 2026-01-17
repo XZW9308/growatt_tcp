@@ -283,7 +283,7 @@ SENSOR_REGISTERS = {
         "state_class": None,
     },
     "pv1_temperature": {
-        "name": "MPPT1 温度",
+        "name": "PV1 温度",
         "address": 32,
         "scale": 0.1,
         "precision": None,
@@ -292,7 +292,7 @@ SENSOR_REGISTERS = {
         "state_class": SensorStateClass.MEASUREMENT,
     },
     "pv2_temperature": {
-        "name": "MPPT2 温度",
+        "name": "PV2 温度",
         "address": 33,
         "scale": 0.1,
         "precision": None,
