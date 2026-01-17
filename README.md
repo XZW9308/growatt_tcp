@@ -1,30 +1,107 @@
-# Growatt Inverter (Modbus TCP)
 
-Home Assistant custom integration for Growatt off-grid / hybrid inverters using Modbus TCP.
+# Growatt TCP Modbus 集成
 
-## Features
+## 概述
 
-- Read inverter status
-- Read power / voltage / current
-- Decode system status codes
-- Local polling (no cloud)
+该集成支持通过Modbus TCP协议连接Growatt逆变器（包括SPF6000ESPLUS和SPE12000ES混合逆变器）。用户可以通过Home Assistant监控逆变器的各项参数，如电压、功率、能量和系统状态。该集成已在SPF6000ESPLUS和SPE12000ES混合逆变器上成功测试，但其他型号的设备需要用户自行测试。
 
-## Installation (HACS)
+## 添加自定义存储库到 HACS
 
-1. HACS → Custom repositories
-2. Add this repository as **Integration**
-3. Install **Growatt Inverter (Modbus TCP)**
-4. Restart Home Assistant
-5. Add integration from UI
+1. 在 **HACS** 页面点击右上角的 **三个点**，选择 **"Custom repositories"**。
+2. 点击 **"Add Repository"**，输入自定义 GitHub 存储库 URL:https://github.com/XZW9308/growatt_tcp.git 和选择类别。
+3. 点击 **"Add"** 保存，返回 **HACS** 页面，找到并点击自定义存储库，点击 **Install** 安装。
+4. 安装后，在 **Configuration > Integrations** 页面配置集成。
 
-## Configuration
+## 已测试设备
 
-Configured via UI (Config Flow).
+- **SPF6000ESPLUS 逆变器**
+- **SPE12000ES 混合逆变器**
 
-## Supported Models
+### 注意：
+该集成目前仅在上述设备上经过验证。如果您使用的是其他设备，请自行进行测试。如果首次加载时没有加载出所有实体，您可以尝试以下操作：
 
-- SPF series (tested)
+1. **点击逆变器设备**进行重新加载。
+2. **重复此操作**，直到成功加载所有74个实体且都能正常使用。
+3. 如果实体仍然无法加载，**删除逆变器设备**并**重新添加**。
+4. 确保**485串口服务器**没有崩溃或出现故障。
 
-## Notes
+## 安装
 
-This is a community integration, not affiliated with Growatt.
+1. **Home Assistant 设置**
+   - 本集成要求Home Assistant 2023.8.0版本或更高版本。
+
+2. **在 Home Assistant 中添加集成**
+   - 转到 **配置 > 集成**，搜索 **Growatt TCP Modbus**。
+   - 按照设置向导配置连接，包括：
+     - **主机**：填写 **485串口服务器的IP地址**。
+     - **端口**：默认端口为 `502`，可以根据需要修改。
+     - **从机ID**：默认值为 `1`。
+     - **协议**：选择 **Modbus** 协议。
+
+## 485串口服务器设置
+
+在进行设备配置时，确保485串口服务器的设置正确：
+
+1. **串口协议选择**：选择 **Modbus 协议**。
+2. **网络参数设置**：
+   - **Server 协议**：选择 **TCP**。
+   - **波特率**：设置为 **9600**。
+   - **串口号**：无串口号（只需确保其他设置正确，无需指定串口号）。
+
+这些设置与插件的配置无关，而是与485串口服务器的连接设置有关。请确保您的485串口服务器已正确配置，以确保与Home Assistant之间的Modbus TCP通信正常。
+
+## 配置
+
+配置可以在 Home Assistant 界面中完成，在集成设置过程中，您需要提供以下信息：
+
+- **主机**：填写 **485串口服务器的IP地址**。
+- **端口**：连接到 Modbus TCP 服务器的端口（默认端口是 `502`）。
+- **从机ID**：Modbus 从机ID（默认值为 `1`）。
+
+### 传感器
+
+此集成提供74个不同的传感器实体，分别对应逆变器的各项参数。以下是一些重要的传感器：
+
+- **系统状态**：逆变器的工作状态。
+- **电压与电流**：包括PV1和PV2的电压、电池电压、以及市电电压。
+- **功率与能量**：实时功率、视在功率、充放电能量等。
+- **温度**：包括PV、逆变器和变压器等温度的监控。
+
+## 故障排除
+
+1. **实体未加载**：
+   - 如果所有74个实体在第一次加载时未能加载，请点击逆变器设备并进行**重新加载**。
+   - 如果实体仍未加载，尝试**删除设备**并**重新添加**。
+
+2. **串口服务器问题**：
+   - 如果集成无法正常工作，请确保**485串口服务器**没有死机或崩溃。
+
+## 调试
+
+如果集成无法正常加载，可以在Home Assistant中启用调试日志记录，以捕获详细的日志信息：
+
+```yaml
+logger:
+  default: debug
+  logs:
+    custom_components.growatt_tcp: debug
+```
+
+检查Home Assistant日志，查看是否有与Modbus通信或串口问题相关的错误。
+
+## 开发者说明
+
+- 此集成通过Modbus TCP读取寄存器数据，相关寄存器配置见 `const.py` 中的 **SENSOR_REGISTERS** 映射。该映射定义了每个传感器的地址、缩放系数、单位和精度。
+- 如果您需要扩展传感器列表，可以将新的寄存器添加到 `const.py` 中。
+- 对于32位传感器，集成通过读取高位和低位寄存器来重建完整的32位值。
+
+### 示例传感器：
+
+- **PV1 电压**
+  - 地址: 1
+  - 单位: **V**
+  - 传感器类别: **电压**
+  - 状态类别: **测量**
+
+您可以在Home Assistant界面中查看这些传感器，实时监控逆变器的各项参数。
+
