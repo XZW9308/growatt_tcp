@@ -5,12 +5,15 @@
 
 该集成支持通过Modbus TCP协议连接Growatt逆变器（包括SPF6000ESPLUS和SPE12000ES混合逆变器）。用户可以通过Home Assistant监控逆变器的各项参数，如电压、功率、能量和系统状态。该集成已在SPF6000ESPLUS和SPE12000ES混合逆变器上成功测试，但其他型号的设备需要用户自行测试。
 
-## 添加自定义存储库到 HACS
+## 添加自定义存储库到 HACS(推荐）
 
-1. 在 **HACS** 页面点击右上角的 **三个点**，选择 **"Custom repositories"**。
-2. 点击 **"Add Repository"**，输入自定义 GitHub 存储库 URL:https://github.com/XZW9308/growatt_tcp.git 和选择类别。
-3. 点击 **"Add"** 保存，返回 **HACS** 页面，找到并点击自定义存储库，点击 **Install** 安装。
-4. 安装后，在 **Configuration > Integrations** 页面配置集成。
+1.在 Home Assistant 中打开 HACS
+2.在 **HACS** 页面点击右上角的 **三个点**，选择 **"Custom repositories"**。
+3.点击 **"Add Repository"**，输入自定义 GitHub 存储库 URL:https://github.com/XZW9308/growatt_tcp.git
+4.选择*Integration*，点击 **"Add"** 保存，返回 **HACS** 页面，找到并点击自定义存储库，点击 **DOWNLOAD** 下载安装。
+5.重启 Home Assistant
+6.前往“设置” → “设备和服务” → “添加集成”
+7.搜索Growatt Inverter(Modbus TCP)
 
 ## 已测试设备
 
