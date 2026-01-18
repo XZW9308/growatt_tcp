@@ -35,7 +35,7 @@
 3. 点击 **Add Repository**，输入：
    https://github.com/XZW9308/growatt_tcp.git
 4. 类型选择 **Integration**，点击 **Add**
-5. 返回 HACS，找到 **Growatt TCP Modbus**，点击 **DOWNLOAD**
+5. 返回 HACS，找到 **Growatt Inverter (Modbus TCP)**，点击 **DOWNLOAD**
 6. **重启 Home Assistant**
 7. 前往 **设置 → 设备和服务 → 添加集成**
 8. 搜索 **Growatt Inverter (Modbus TCP)** 并添加
