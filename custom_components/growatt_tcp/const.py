@@ -301,7 +301,7 @@ SENSOR_REGISTERS = {
         "state_class": SensorStateClass.MEASUREMENT,
     },
     "inverter_output_current": {
-        "name": "逆变器输出电流",
+        "name": "逆变器转换输出电流",
         "address": 34,
         "scale": 0.1,
         "precision": 1,
@@ -310,7 +310,7 @@ SENSOR_REGISTERS = {
         "state_class": SensorStateClass.MEASUREMENT,
     },
     "inverter_current": {
-        "name": "逆变器电流",
+        "name": "逆变器输出电流",
         "address": 35,
         "scale": 0.1,
         "precision": 1,
