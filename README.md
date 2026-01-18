@@ -21,7 +21,7 @@
 ## ✨ 功能特性
 
 - ✅ 基于 **Modbus TCP**
-- ✅ 支持 **74 个传感器实体**
+- ✅ 支持 **74 个传感器实体**（Growatt官方文档全部传感器）
 - ✅ 支持 Home Assistant UI 配置（Config Flow）
 - ✅ 本地轮询（Local Polling），无需云端
 - ✅ 设备 + 实体完整呈现，便于仪表盘展示
