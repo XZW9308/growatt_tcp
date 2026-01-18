@@ -400,7 +400,7 @@ SENSOR_REGISTERS = {
         "state_class": SensorStateClass.TOTAL_INCREASING,
     },
     "today_pv_energy": {
-        "name": "今日光伏能量",
+        "name": "光伏今日能量",
         "address": 49,
         "scale": 0.1,
         "precision": 1,
@@ -436,7 +436,7 @@ SENSOR_REGISTERS = {
         "state_class": SensorStateClass.TOTAL_INCREASING,
     },
     "total_grid_charging_energy_high": {
-        "name": "累计市电充电能量高位",
+        "name": "市电累计充电能量高位",
         "address": 58,
         "scale": 0.1,
         "precision": None,
@@ -445,7 +445,7 @@ SENSOR_REGISTERS = {
         "state_class": SensorStateClass.TOTAL_INCREASING,
     },
     "total_grid_charging_energy": {
-        "name": "累计市电充电能量",
+        "name": "市电累计充电能量",
         "address": 59,
         "scale": 0.1,
         "precision": None,
@@ -454,7 +454,7 @@ SENSOR_REGISTERS = {
         "state_class": SensorStateClass.TOTAL_INCREASING,
     },
     "today_battery_discharge_energy": {
-        "name": "今日电池放电能量",
+        "name": "电池今日放电能量",
         "address": 61,
         "scale": 0.1,
         "precision": 1,
@@ -481,7 +481,7 @@ SENSOR_REGISTERS = {
         "state_class": SensorStateClass.TOTAL_INCREASING,
     },
     "today_grid_discharge_energy": {
-        "name": "今日市电放电能量",
+        "name": "市电今日放电能量",
         "address": 65,
         "scale": 0.1,
         "precision": 1,
