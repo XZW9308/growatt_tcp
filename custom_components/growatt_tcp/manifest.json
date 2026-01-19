@@ -1,7 +1,7 @@
 {
   "domain": "growatt_tcp",
   "name": "Growatt Inverter (Modbus TCP)",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "documentation": "https://github.com/xzw9308/growatt_tcp",
   "requirements": ["pymodbus>=3.0.0"],
   "config_flow": true,
