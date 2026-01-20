@@ -130,7 +130,7 @@ SENSOR_REGISTERS = {
         "state_class": SensorStateClass.MEASUREMENT,
     },
     "ac_charging_power": {
-        "name": "交流充电功率",
+        "name": "市电充电功率",
         "address": 14,
         "scale": 0.1,
         "precision": None,
