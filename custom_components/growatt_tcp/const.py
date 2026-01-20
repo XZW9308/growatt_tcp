@@ -139,7 +139,7 @@ SENSOR_REGISTERS = {
         "state_class": SensorStateClass.MEASUREMENT,
     },
     "ac_charging_apparent_power": {
-        "name": "交流充电视在功率",
+        "name": "市电充电视在功率",
         "address": 16,
         "scale": 0.1,
         "precision": None,
