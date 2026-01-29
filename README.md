@@ -89,7 +89,7 @@
 
 ### 🧩 RS485 与 RJ45 网线头接线示意图
 
-<img width="457" height="249" alt="af551b345c09822b91ea186c359fa8c6" src="https://github.com/user-attachments/assets/f13d34b2-392a-4afa-9b3f-a1f3172c0e04" />
+<img width="457" height="249" alt="image" src="https://github.com/user-attachments/assets/1a86f04b-3000-45dd-8749-c21f889cc16f" />
 
 **说明：**
 
